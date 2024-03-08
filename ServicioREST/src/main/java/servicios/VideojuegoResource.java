@@ -54,28 +54,32 @@ public class VideojuegoResource {
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response agregarVideojuego(Videojuego videojuego) {
-        dao.registrarVideojuego(videojuego);
-        return Response.ok().build();
+        Videojuego videojuegoRegistrado = dao.registrarVideojuego(videojuego);
+        return Response.ok().entity(videojuegoRegistrado).build();
     }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response actualizarVideojuego(Videojuego videojuego) {
         if (dao.modificarVideojuego(videojuego) == null) {
             return Response.status(404).build();
         } else {
-            return Response.ok().build();
+            return Response.ok().entity(videojuego).build();
         }
     }
 
     @DELETE
     @Path("{id}")
+    @Produces(MediaType.APPLICATION_JSON)
     public Response eliminarVideojuego(@PathParam("id") Long idVideojuego) {
-        if (dao.eliminarVideojuego(idVideojuego) == null) {
+        Videojuego videojuegoEliminado = dao.eliminarVideojuego(idVideojuego);
+        if (videojuegoEliminado == null) {
             return Response.status(404).build();
         } else {
-            return Response.ok().build();
+            return Response.ok().entity(videojuegoEliminado).build();
         }
     }
 

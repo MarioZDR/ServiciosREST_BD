@@ -24,12 +24,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>CapaDatosVideojuegos</artifactId>
+            <artifactId>LibreriaVideojuegos</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>LibreriaVideojuegos</artifactId>
+            <artifactId>CapaDatosVideojuegos</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -8,6 +8,7 @@ import dominio.Videojuego;
 import conexion.Conexion;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,23 +17,28 @@ import java.util.List;
  * @author mario
  */
 public class VideojuegoDAO {
-    
+
     private Conexion conexion;
 
     public VideojuegoDAO() {
         conexion = new Conexion();
     }
-    
+
     public Videojuego registrarVideojuego(Videojuego videojuego) {
         PreparedStatement pst = null;
+        ResultSet rs = null;
         try {
             String consulta = "INSERT INTO VIDEOJUEGOS(NOMBRE, ANIOLANZAMIENTO) VALUES(?,?);";
-            pst = this.conexion.getConexion().prepareStatement(consulta);
+            pst = this.conexion.getConexion().prepareStatement(consulta, Statement.RETURN_GENERATED_KEYS);
             pst.setString(1, videojuego.getNombre());
             pst.setInt(2, videojuego.getAnioLanzamiento());
 
             if (pst.executeUpdate() == 1) {
-                return videojuego;
+                rs = pst.getGeneratedKeys();
+                if (rs.next()) {
+                    videojuego.setId(rs.getLong(1));
+                    return videojuego;
+                }
             }
         } catch (Exception ex) {
             return null;
@@ -129,14 +135,15 @@ public class VideojuegoDAO {
     public Videojuego eliminarVideojuego(Long idVideojuego) {
         PreparedStatement pst = null;
         try {
-            String consulta = "DELETE FROM VIDEOJUEGOS WHERE ID = ?;";
-            pst = this.conexion.getConexion().prepareStatement(consulta);
-            pst.setLong(1, idVideojuego);
+            Videojuego videojuegoEliminar = this.consultarVideojuego(idVideojuego);
+            if (videojuegoEliminar != null) {
+                String consulta = "DELETE FROM VIDEOJUEGOS WHERE ID = ?;";
+                pst = this.conexion.getConexion().prepareStatement(consulta);
+                pst.setLong(1, idVideojuego);
 
-            if (pst.executeUpdate() == 1) {
-                Videojuego videojuego = new Videojuego();
-                videojuego.setId(idVideojuego);
-                return videojuego;
+                if (pst.executeUpdate() == 1) {
+                    return videojuegoEliminar;
+                }
             }
         } catch (Exception ex) {
             return null;
@@ -144,5 +151,4 @@ public class VideojuegoDAO {
         return null;
     }
 
-    
 }
