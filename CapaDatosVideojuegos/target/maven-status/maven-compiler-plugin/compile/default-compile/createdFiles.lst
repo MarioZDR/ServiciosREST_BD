@@ -1,0 +1,4 @@
+conexion\Conexion.class
+dao\VideojuegoDAO.class
+dao\IFachadaDAO.class
+dao\FachadaDAO.class
