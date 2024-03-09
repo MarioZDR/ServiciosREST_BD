@@ -140,7 +140,7 @@ async function eliminarVideojuego(id) {
         headers: {
             "Content-Type": "application/json"
         }
-    });
+    }).then(res=>res.json()).catch(err=>alert("No se encontro un videojuego con ese id"));
     return resultado = await response.json();
 }
 
@@ -151,7 +151,7 @@ async function consultarTodosVideojuegos() {
         headers: {
             "Content-Type": "application/json"
         }
-    });
+    }).then(res=>res.json()).catch(err=>alert("No se encontraron registros de videojuegos"));
 
     const resultado = await response.json();
     agregarFilasATabla(resultado);
@@ -163,7 +163,7 @@ async function consultarPorIdVideojuego(id) {
         headers: {
             "Content-Type": "application/json"
         }
-    });
+    }).then(res=>res.json()).catch(err=>alert("No se encontro un videojuego con ese id"));
 
     vaciarTabla();
     if (response.ok) {
@@ -171,8 +171,6 @@ async function consultarPorIdVideojuego(id) {
         if (resultado) {
             agregarFilaATabla(resultado);
         }
-    } else if (response.status === 404) {
-        alert("No se encontro un videojuego con ese id");
     }
 }
 
@@ -182,7 +180,7 @@ async function consultarPorFiltros(anio, nombre) {
         headers: {
             "Content-Type": "application/json"
         }
-    });
+    }).then(res=>res.json()).catch(err=>alert("No se encontro un videojuego con esos filtros"));
 
     vaciarTabla();
     if (response.ok) {
@@ -194,8 +192,6 @@ async function consultarPorFiltros(anio, nombre) {
                 agregarFilaATabla(Object.values(resultados)[0]);
             }
         }
-    } else if (response.status === 404) {
-        alert("No se encontro un videojuego con esos filtros");
     }
 }
 
@@ -207,7 +203,7 @@ async function agregar(videojuego) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(videojuego),
-    });
+    }).then(res=>res.json());
 
     const resultado = await response.json();
     agregarFilaATabla(resultado)
@@ -221,7 +217,7 @@ async function editar(videojuego) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(videojuego),
-    });
+    }).then(res=>res.json()).catch(err=>alert("No se encontro un videojuego con ese id"));
 
     const resultado = await response.json();
     modificarFilaTabla(resultado);
