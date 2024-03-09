@@ -158,33 +158,35 @@ async function consultarTodosVideojuegos() {
 }
 
 async function consultarPorIdVideojuego(id) {
-        const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/${id}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
-
-        vaciarTabla();
-        if (response.ok) {
-            const resultado = await response.json();
-            if (resultado) {
-                agregarFilaATabla(resultado);
-            }
+    const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
         }
+    });
+
+    vaciarTabla();
+    if (response.ok) {
+        const resultado = await response.json();
+        if (resultado) {
+            agregarFilaATabla(resultado);
+        }
+    } else if (response.status === 404) {
+        alert("No se encontro un videojuego con ese id");
+    }
 }
 
 async function consultarPorFiltros(anio, nombre) {
-        const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/query?anioLanzamiento=${anio}&inicioNombre=${nombre}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json"
-            }
-        });
+    const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/query?anioLanzamiento=${anio}&inicioNombre=${nombre}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
 
-        vaciarTabla();
+    vaciarTabla();
+    if (response.ok) {
         const resultados = await response.json();
-        
         if (resultados) {
             if (resultados.length > 1) {
                 agregarFilasATabla(resultados);
@@ -192,6 +194,9 @@ async function consultarPorFiltros(anio, nombre) {
                 agregarFilaATabla(Object.values(resultados)[0]);
             }
         }
+    } else if (response.status === 404) {
+        alert("No se encontro un videojuego con esos filtros");
+    }
 }
 
 async function agregar(videojuego) {
