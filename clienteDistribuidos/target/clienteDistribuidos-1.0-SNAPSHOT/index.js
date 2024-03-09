@@ -32,35 +32,43 @@ function agregarFilasATabla(resultados) {
 }
 
 function cargarBotones(nuevaFila, editarCell, tabla, eliminarCell) {
+    crearBotonEditar(nuevaFila, editarCell);
+    crearBotonEliminar(nuevaFila, tabla, eliminarCell);
+}
+
+function crearBotonEditar(nuevaFila, editarCell) {
     const btnEditar = document.createElement('button');
     btnEditar.textContent = 'Editar';
     btnEditar.addEventListener('click', () => {
-        const idFila = nuevaFila.cells[0].textContent;
-        const nombreFila = nuevaFila.cells[1].textContent;
-        const anioFila = nuevaFila.cells[2].textContent;
-
-        formularioNombre.value = nombreFila;
-        formularioAnio.value = anioFila;
-        botonFormulario.value = "Editar";
-        idVideojuegoEdicionActual = idFila;
+        llenarFormulario(nuevaFila);
     });
     editarCell.appendChild(btnEditar);
+}
 
+function crearBotonEliminar(nuevaFila, tabla, eliminarCell) {
     const btnEliminar = document.createElement('button');
     btnEliminar.textContent = 'Eliminar';
     btnEliminar.addEventListener('click', () => {
         const idFila = nuevaFila.cells[0].textContent;
-        console.log(idFila)
+        console.log(idFila); // Imprime el ID para depuración
         const objetoEliminado = eliminarVideojuego(idFila);
         if (objetoEliminado) {
             tabla.deleteRow(nuevaFila.rowIndex - 1);
         }
     });
     eliminarCell.appendChild(btnEliminar);
-
 }
 
+function llenarFormulario(nuevaFila) {
+    const idFila = nuevaFila.cells[0].textContent;
+    const nombreFila = nuevaFila.cells[1].textContent;
+    const anioFila = nuevaFila.cells[2].textContent;
 
+    formularioNombre.value = nombreFila;
+    formularioAnio.value = anioFila;
+    botonFormulario.value = "Editar";
+    idVideojuegoEdicionActual = idFila;
+}
 
 formulario.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -254,7 +262,7 @@ function agregarFilaATabla(videojuego) {
     const anioCell = nuevaFila.insertCell(2);
     const editarCell = nuevaFila.insertCell(3);
     const eliminarCell = nuevaFila.insertCell(4);
-
+    
     idCell.textContent = videojuego.id;
     nombreCell.textContent = videojuego.nombre;
     anioCell.textContent = videojuego.anioLanzamiento;
