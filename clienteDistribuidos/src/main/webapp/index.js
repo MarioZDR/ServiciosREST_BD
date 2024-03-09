@@ -8,6 +8,7 @@ const botonFormulario = document.querySelector('#btnAgregar');
 
 const consultarTodos = document.querySelector('#consultarTodos');
 const consultarPorId = document.querySelector('#consultarPorId');
+const consultarPorFiltrosBoton = document.querySelector('#consultarPorFiltros');
 
 function agregarFilasATabla(resultados) {
     const tabla = document.getElementById('tabla').getElementsByTagName('tbody')[0];
@@ -37,7 +38,7 @@ function cargarBotones(nuevaFila, editarCell, tabla, eliminarCell) {
         const idFila = nuevaFila.cells[0].textContent;
         const nombreFila = nuevaFila.cells[1].textContent;
         const anioFila = nuevaFila.cells[2].textContent;
-         
+
         formularioNombre.value = nombreFila;
         formularioAnio.value = anioFila;
         botonFormulario.value = "Editar";
@@ -67,24 +68,36 @@ formulario.addEventListener('submit', (e) => {
     const nombre = document.getElementById('nombre').value;
     const anio = document.getElementById('anio').value;
 
-    if(idVideojuegoEdicionActual === -1){
+    if (idVideojuegoEdicionActual === -1) {
         const videojuego = crearVideojuego(nombre, anio);
         formulario.reset();
         agregar(videojuego);
-    }else{
+    } else {
         const videojuegoEditado = editarVideojuego(nombre, anio);
         editar(videojuegoEditado);
-        
+
         botonFormulario.value = "Agregar";
         idVideojuegoEdicionActual = -1;
     }
-    
+
 });
 
 
 consultarTodos.addEventListener('click', (e) => {
     e.preventDefault();
     consultarTodosVideojuegos();
+
+});
+
+consultarPorFiltrosBoton.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const anio = document.getElementById('anioLanzamiento').value;
+    const nombre = document.getElementById('nombreVideojuego').value;
+
+    if (anio.trim() !== "" && nombre.trim() !== "") {
+        consultarPorFiltros(anio, nombre);
+    }
 
 });
 
@@ -112,7 +125,7 @@ function crearVideojuego(nombre, anio) {
     return videojuego;
 }
 
-function editarVideojuego(nombre, anio){
+function editarVideojuego(nombre, anio) {
     const videojuego = {
         "anioLanzamiento": parseInt(anio),
         "id": parseInt(idVideojuegoEdicionActual),
@@ -145,21 +158,40 @@ async function consultarTodosVideojuegos() {
 }
 
 async function consultarPorIdVideojuego(id) {
+        const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
 
-    const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/${id}`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json"
+        vaciarTabla();
+        if (response.ok) {
+            const resultado = await response.json();
+            if (resultado) {
+                agregarFilaATabla(resultado);
+            }
         }
-    });
+}
 
-    vaciarTabla();
-    if (response.ok) {
-        const resultado = await response.json();
-        if (resultado) {
-            agregarFilaATabla(resultado);
+async function consultarPorFiltros(anio, nombre) {
+        const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/query?anioLanzamiento=${anio}&inicioNombre=${nombre}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        vaciarTabla();
+        const resultados = await response.json();
+        
+        if (resultados) {
+            if (resultados.length > 1) {
+                agregarFilasATabla(resultados);
+            } else {
+                agregarFilaATabla(Object.values(resultados)[0]);
+            }
         }
-    }
 }
 
 async function agregar(videojuego) {
@@ -185,7 +217,7 @@ async function editar(videojuego) {
         },
         body: JSON.stringify(videojuego),
     });
- 
+
     const resultado = await response.json();
     modificarFilaTabla(resultado);
     formulario.reset();
