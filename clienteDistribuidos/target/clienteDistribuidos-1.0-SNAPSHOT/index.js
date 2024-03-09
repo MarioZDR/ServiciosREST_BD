@@ -1,9 +1,13 @@
 
-
-
-
+idVideojuegoEdicionActual = -1;
 const formulario = document.querySelector('#formulario');
+
+const formularioNombre = document.querySelector('#nombre');
+const formularioAnio = document.querySelector('#anio');
+const botonFormulario = document.querySelector('#btnAgregar');
+
 const consultarTodos = document.querySelector('#consultarTodos');
+const consultarPorId = document.querySelector('#consultarPorId');
 
 function agregarFilasATabla(resultados) {
     const tabla = document.getElementById('tabla').getElementsByTagName('tbody')[0];
@@ -21,16 +25,23 @@ function agregarFilasATabla(resultados) {
         idCell.textContent = resultado.id;
         nombreCell.textContent = resultado.nombre;
         anioCell.textContent = resultado.anioLanzamiento;
-        cargarBotones(nuevaFila,editarCell,tabla,eliminarCell)
+        cargarBotones(nuevaFila, editarCell, tabla, eliminarCell)
     });
 
 }
 
-function cargarBotones(nuevaFila,editarCell,tabla,eliminarCell) {
+function cargarBotones(nuevaFila, editarCell, tabla, eliminarCell) {
     const btnEditar = document.createElement('button');
     btnEditar.textContent = 'Editar';
     btnEditar.addEventListener('click', () => {
-        console.log('Editar videojuego de la fila:', nuevaFila.rowIndex);
+        const idFila = nuevaFila.cells[0].textContent;
+        const nombreFila = nuevaFila.cells[1].textContent;
+        const anioFila = nuevaFila.cells[2].textContent;
+         
+        formularioNombre.value = nombreFila;
+        formularioAnio.value = anioFila;
+        botonFormulario.value = "Editar";
+        idVideojuegoEdicionActual = idFila;
     });
     editarCell.appendChild(btnEditar);
 
@@ -56,10 +67,18 @@ formulario.addEventListener('submit', (e) => {
     const nombre = document.getElementById('nombre').value;
     const anio = document.getElementById('anio').value;
 
-    const videojuego = crearVideojuego(nombre, anio);
-    agregar(videojuego);
-    formulario.reset();
-
+    if(idVideojuegoEdicionActual === -1){
+        const videojuego = crearVideojuego(nombre, anio);
+        formulario.reset();
+        agregar(videojuego);
+    }else{
+        const videojuegoEditado = editarVideojuego(nombre, anio);
+        editar(videojuegoEditado);
+        
+        botonFormulario.value = "Agregar";
+        idVideojuegoEdicionActual = -1;
+    }
+    
 });
 
 
@@ -69,10 +88,34 @@ consultarTodos.addEventListener('click', (e) => {
 
 });
 
+consultarPorId.addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById('idConsultar').value;
+
+    if (id.trim() !== "") {
+        consultarPorIdVideojuego(id);
+    }
+});
+
+function vaciarTabla() {
+    var tbody = document.getElementById('tabla').getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+}
+
 function crearVideojuego(nombre, anio) {
     const videojuego = {
         "anioLanzamiento": parseInt(anio),
         "id": null,
+        "nombre": nombre
+    };
+    return videojuego;
+}
+
+function editarVideojuego(nombre, anio){
+    const videojuego = {
+        "anioLanzamiento": parseInt(anio),
+        "id": parseInt(idVideojuegoEdicionActual),
         "nombre": nombre
     };
     return videojuego;
@@ -98,7 +141,25 @@ async function consultarTodosVideojuegos() {
     });
 
     const resultado = await response.json();
-    agregarFilasATabla(resultado)
+    agregarFilasATabla(resultado);
+}
+
+async function consultarPorIdVideojuego(id) {
+
+    const response = await fetch(`http://localhost:8080/ServicioREST/resources/Videojuego/${id}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    vaciarTabla();
+    if (response.ok) {
+        const resultado = await response.json();
+        if (resultado) {
+            agregarFilaATabla(resultado);
+        }
+    }
 }
 
 async function agregar(videojuego) {
@@ -115,6 +176,34 @@ async function agregar(videojuego) {
     agregarFilaATabla(resultado)
 }
 
+async function editar(videojuego) {
+
+    const response = await fetch("http://localhost:8080/ServicioREST/resources/Videojuego", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(videojuego),
+    });
+ 
+    const resultado = await response.json();
+    modificarFilaTabla(resultado);
+    formulario.reset();
+}
+
+function modificarFilaTabla(videojuegoModificado) {
+    const tabla = document.getElementById('tabla').getElementsByTagName('tbody')[0];
+    for (let i = 0; i < tabla.rows.length; i++) {
+        const fila = tabla.rows[i];
+        const idFila = fila.cells[0].textContent;
+        if (idFila === videojuegoModificado.id.toString()) {
+            fila.cells[1].textContent = videojuegoModificado.nombre;
+            fila.cells[2].textContent = videojuegoModificado.anioLanzamiento;
+            break;
+        }
+    }
+}
+
 function agregarFilaATabla(videojuego) {
     const tabla = document.getElementById('tabla').getElementsByTagName('tbody')[0];
     const nuevaFila = tabla.insertRow();
@@ -127,7 +216,7 @@ function agregarFilaATabla(videojuego) {
     idCell.textContent = videojuego.id;
     nombreCell.textContent = videojuego.nombre;
     anioCell.textContent = videojuego.anioLanzamiento;
-    cargarBotones(nuevaFila,editarCell,tabla,eliminarCell);
+    cargarBotones(nuevaFila, editarCell, tabla, eliminarCell);
 }
 
 
